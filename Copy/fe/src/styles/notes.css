@@ -1,0 +1,147 @@
+body {
+  margin: 20px;
+  background-color: lightgrey;
+}
+
+.app-container {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .app-container {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+  }
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.note-item {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 250px;
+  /* Fixed height for consistency */
+  overflow: hidden;
+  /* Prevents content from spilling out */
+}
+
+.notes-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.notes-header button {
+  font-size: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  max-width: fit-content;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  /* Ensures long titles don't cause horizontal scroll */
+}
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+textarea,
+input {
+  border-radius: 5px;
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.note-form button {
+  border-radius: 5px;
+  background-color: rgb(64, 154, 184);
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  color: white;
+}
+
+.note-form button:hover {
+  background-color: rgb(106, 175, 198);
+  cursor: pointer;
+}
+
+.edit-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 5px;
+}
+
+.edit-buttons button {
+  flex: 1;
+}
+
+.edit-buttons button:last-of-type {
+  background-color: rgb(220, 89, 89);
+  color: white;
+}
+
+.notes-content {
+  margin: 0;
+  padding-right: 5px;
+  /* Space for scrollbar */
+  margin-bottom: 20px;
+  /* This adds space at the bottom of the content */
+  word-wrap: break-word;
+  /* Ensures long words don't cause horizontal scroll */
+  white-space: normal;
+  /* Allows text to wrap */
+}
+
+.notes-content-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-content-wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.notes-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 15px 15px;
+  overflow-x: hidden;
+  /* Changed from scroll to hidden */
+}
+
+.notes-content-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Hide horizontal scrollbar */
+  margin-bottom: 15px;
+  /* Space at the bottom */
+}
+
+.notes-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.notes-date {
+  border: 2px solid black;
+}
