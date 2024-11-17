@@ -1,6 +1,6 @@
 body {
-  margin: 20px;
   background-color: lightgrey;
+  overflow-y: hidden;
 }
 
 .app-container {
