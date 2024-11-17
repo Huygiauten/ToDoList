@@ -1,55 +1,77 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./App.css";
-import Header from "./components/layout/header";
+import Sidebar from "./components/layout/sidebar"; // Import Sidebar component
 import { Outlet } from "react-router-dom";
 import axios from '../src/util/axios.customize';
 import { AuthContext } from "./components/context/auth.context";
-import { Spin } from "antd";
+import { Layout, Spin } from "antd";
 
-const App = () =>{
-  const {setAuth, appLoading, setAppLoading} = useContext(AuthContext);
+const { Content } = Layout;
 
-  useEffect(()  =>{
-    const fetchAccount = async() =>{
+const App = () => {
+  const { setAuth, appLoading, setAppLoading } = useContext(AuthContext);
+  const [collapsed, setCollapsed] = useState(true); // Bắt đầu ở trạng thái thu gọn
+
+  useEffect(() => {
+    const fetchAccount = async () => {
       setAppLoading(true);
       const res = await axios.get(`/users/account`);
 
-      if(res && !res.message){
+      if (res && !res.message) {
         setAuth({
           isAuthenticated: true,
-          user:{
-              email: res.email,
-              name:  res.name,
-              _id: res._id //add userId infor
+          user: {
+            email: res.email,
+            name: res.name,
+            _id: res._id,
+            role: res.role,
+            usersID: res.usersID
           }
-        })
+        });
       }
       setAppLoading(false);
-    }
+    };
 
     fetchAccount();
   }, []);
 
-  return (
-  <div>
-    {appLoading == true ?
-     <div style={{
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)"
-     }}>
-      <Spin>
+  const handleMouseEnter = () => {
+    setCollapsed(false); // Mở rộng Sidebar khi di chuột vào
+  };
 
-      </Spin>
-    </div>
-    :
-    <>
-      <Header/>
-      <Outlet/>
-    </>
-    }
-  </div>)
-}
+  const handleMouseLeave = () => {
+    setCollapsed(true); // Thu gọn Sidebar khi di chuột ra ngoài
+  };
+
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      {appLoading === true ? (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)"
+          }}
+        >
+          <Spin />
+        </div>
+      ) : (
+        <>
+          <Sidebar
+            collapsed={collapsed}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          />
+          <Layout className="site-layout">
+            <Content style={{ background: '#fff' }}>
+              <Outlet />
+            </Content>
+          </Layout>
+        </>
+      )}
+    </Layout>
+  );
+};
 
 export default App;
