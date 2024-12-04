@@ -1,0 +1,25 @@
+.group-page-container {
+    padding: 20px;
+}
+
+.group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.group-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.group-item h2 {
+    margin: 0 0 10px;
+}
+
+.group-item p {
+    color: #666;
+    margin-bottom: 8px;
+}

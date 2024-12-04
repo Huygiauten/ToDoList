@@ -1,0 +1,40 @@
+/* Home.css */
+.home-container {
+    background: linear-gradient(135deg, #1e90ff, #00bfff);
+    /* Màu nền gradient xanh dương */
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    /* Màu chữ trắng */
+}
+
+.banner {
+    text-align: center;
+}
+
+.banner .ant-result-title {
+    font-size: 36px;
+    /* Tăng kích thước tiêu đề */
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.banner .ant-result-subtitle {
+    font-size: 18px;
+    margin-bottom: 40px;
+    color: black;
+}
+
+.banner .ant-btn-primary {
+    background-color: #ff7f50;
+    /* Màu nút cam nổi bật */
+    border: none;
+}
+
+.banner .ant-btn-primary:hover {
+    background-color: #ff4500;
+    /* Màu cam đậm khi hover */
+    transition: background-color 0.3s ease;
+}
