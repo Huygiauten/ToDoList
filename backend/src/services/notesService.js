@@ -15,11 +15,14 @@ const createNotesService = async (title, content, date, userId) => {
     const user = await User.findOne({ userID: userId });
     console.log(user);
     if (user && user.email) {
-      try {
-        await sendEmail(user.email, 'New Note Created for You', 'Hello, a new note has been created for you');
-      } catch (err) {
-        console.log(err);
-      }
+      // Gửi email trong một tác vụ bất đồng bộ riêng biệt
+      setImmediate(async () => {
+        try {
+          await sendEmail(user.email, 'New Note Created for You', 'Hello, a new note has been created for you');
+        } catch (err) {
+          console.log('Email error: ', err);
+        }
+      });
     }
     return result;
 

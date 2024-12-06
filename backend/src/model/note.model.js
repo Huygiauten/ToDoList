@@ -7,7 +7,7 @@ let notesSchema = new mongoose.Schema({
         type: Date,
         default: Date.now(),
     },
-    userId: String,
+    userId: String
 })
 
 const Notes = mongoose.model('notes', notesSchema);

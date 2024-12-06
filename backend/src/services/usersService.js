@@ -1,131 +1,101 @@
-/* --------------INIT SETTINGS----------------- */
-const express = require("express");
+const Users = require("../model/users.model");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const saltRounds = 10;
+require('dotenv').config();
 
-const cors = require("cors");
+const registerUsersService = async (name, email, password, role) => {
+    try {
+        const usersExist = await Users.findOne({ email: email });
+        if (usersExist) {
+            return { exists: true };
+        } else {
+            const hashPassword = await bcrypt.hash(password, saltRounds);
+            let result = await Users.create({
+                name: name,
+                email: email,
+                password: hashPassword,
+                role: role,
+                userID: '2021' + Math.floor(100000 + Math.random() * 900000)
+            })
 
-const { getDb } = require('../config/databaseConfig.js');
-const app = express();
-const Notes = require('../model/notes.model.js');
-const { createNotesService, deleteNotesService, updateNotesService } = require('../services/notesService.js');
-
-app.use(express.json());
-app.use(cors());
-/* --------------INIT SETTINGS----------------- */
-
-/* --------------CREATE NOTE----------------- */
-
-const createNote = async (req, res) => {//post
-  const { title, content, id, date } = req.body;
-
-  if (!title || !content) {
-    return res.status(400).json({ message: "Please provide title and content" });
-  }
-  try {
-    const response = await createNotesService(title, content, date, id); //change variable name to match with req.body
-    if (response) {
-      return res.status(200).json(response);
-    } else {
-      return res.status(400).send("Error");
+            return result;
+        }
+    } catch (err) {
+        console.log(err);
+        return null;
     }
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send("Internal Server Error");
-  }
 }
 
-const getNotes = async (req, res) => {//get
-  let result = [];
-  try {
-    const userId = req.params.id; //this will return userId
-    result = await Notes.find({ userId: userId });
-    if (result) {
-      return res.status(200).send(result);
-    } else {
-      return res.status(400).send("Error");
+const loginUsersService = async (email, password) => {
+    try {
+        //fetch user by email
+        const user = await Users.findOne({ email: email });
+
+        if (user) {
+            //compare password
+            const isMatchedPassword = await bcrypt.compare(
+                password, user.password
+            )
+            if (!isMatchedPassword) {
+                return {
+                    EC: 2,
+                    EM: "Email/Password không hợp lệ"
+                }
+            } else {
+                const payload = {
+                    email: user.email,
+                    name: user.name,
+                    usersID: user.userID,
+                    role: user.role,
+                    _id: user._id.toString(), //convert userId from ObjectId to String
+                }
+                //create an access token 
+                const access_token = jwt.sign(
+                    payload,
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: process.env.JWT_EXPIRE
+                    }
+                );
+                return {
+                    EC: 0,
+                    access_token,
+                    user: {
+                        email: user.email,
+                        name: user.name,
+                        usersID: user.userID,
+                        role: user.role,
+                        _id: user._id.toString(),
+                    }
+                };
+            }
+        } else {
+            return {
+                EC: 1,
+                EM: "Email/Password không hợp lệ"
+            }
+        }
+    } catch (err) {
+        console.log(err);
+        return null;
     }
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send("Internal Server Error");
-  }
 }
-const getNotesInGroup = async (req, res) => {
-  let result = [];
-  try {
-    const userId = req.params.userId;
-    result = await Notes.find({ userId: userId });
-    if (result) {
-      return res.status(200).send(result);
-    } else {
-      return res.status(400).send("Error");
+
+const getUsersService = async () => {
+    try {
+        const result = await Users.find({}).select("-password");
+        return result;
+    } catch (err) {
+        console.log(err);
+        return null;
     }
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send("Internal Server Error");
-  }
 }
 
-const deleteNotes = async (req, res) => {
-  const id = req.params.id;
-  let result;
-  try {
-    result = await deleteNotesService(id);
-    if (result) {
-      return res.status(200).send(`Deleted: ${result}`);
-    } else {
-      return res.status(400).send("Error");
-    }
-  } catch (err) {
-    console.log(err);
-    return res.status(404).send("Not Found");
-  }
-};
-
-
-const updateNote = async (req, res) => {
-  const id = req.params.id;
-  const { title, content, date: dateString } = req.body;
-  try {
-    const updatedNote = await updateNotesService(id, title, content, dateString);
-    if (!updatedNote) {
-      return res.status(404).send("Note not found");
-    }
-    res.status(200).json(updatedNote);
-  } catch (err) {
-    console.error("Error updating note:", err);
-    return res.status(500).send("Internal Server Error");
-  }
-};
-
-const getNotesFromDay = async (req, res) => {
-  const { date: datestring } = req.query;
-  const startTime = new Date(datestring);
-  startTime.setHours(0, 0, 0, 0);
-
-  const endTime = new Date(datestring);
-  endTime.setHours(23, 59, 59, 999);
-
-  try {
-    const db = getDb();
-    const collection = db.collection('ToDoList');
-    const response = await collection.find({
-      "Date": {
-        $gte: startTime,
-        $lt: endTime
-      }
-    }).toArray();
-    return res.status(200).send(response);
-  } catch (err) {
-    console.error("Error fetching notes:", err);
-    return res.status(500).send(err);
-  }
-};
 
 
 module.exports = {
-  createNote: createNote,
-  getNotes: getNotes,
-  deleteNotes: deleteNotes,
-  updateNote: updateNote,
-  todayNote: getNotesFromDay,
-  getNotesInGroup: getNotesInGroup
+    registerUsersService,
+    loginUsersService,
+    getUsersService
 }

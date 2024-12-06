@@ -1,4 +1,3 @@
-/* --------------INIT SETTINGS----------------- */
 const express = require("express");
 
 const cors = require("cors");
@@ -10,9 +9,6 @@ const { createNotesService, deleteNotesService, updateNotesService } = require('
 
 app.use(express.json());
 app.use(cors());
-/* --------------INIT SETTINGS----------------- */
-
-/* --------------CREATE NOTE----------------- */
 
 const createNote = async (req, res) => {//post
   const { title, content, id, date } = req.body;
