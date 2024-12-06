@@ -15,7 +15,7 @@ import UsersPage from './pages/users.jsx';
 import HomePage from './pages/home.jsx';
 import LoginPage from './pages/login.jsx';
 import GroupPage from './pages/group.jsx';
-import { AuthWrapper } from './components/context/auth.context.js';
+import { AuthWrapper } from './components/context/auth.context.jsx';
 
 const router = createBrowserRouter([
   {
