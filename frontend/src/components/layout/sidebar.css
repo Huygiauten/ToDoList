@@ -1,0 +1,27 @@
+.sidebar-username {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    /* Đặt giới hạn chiều rộng để tránh tên quá dài */
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.sidebar-footer {
+    padding: 16px;
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+    border-top: 1px solid #e8e8e8;
+    background-color: #f4f4f4;
+    position: fixed;
+    bottom: 0;
+    width: 200px;
+    /* Chiều rộng Sidebar khi không thu gọn */
+}
+
+.collapsed .sidebar-footer {
+    width: 80px;
+    /* Chiều rộng Sidebar khi thu gọn */
+}
