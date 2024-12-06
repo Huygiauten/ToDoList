@@ -3,28 +3,34 @@ import { notification, Table, Spin, Input, Button, Modal, Form, DatePicker } fro
 import { getUserApi } from '../util/api';
 import '../styles/usersPage.css';
 import axios from '../util/axios.customize';
+import { Link, useParams } from 'react-router-dom';
 
 const { Search } = Input;
 
 const UsersPage = () => {
+    const { groupId } = useParams();
     const [dataSource, setDataSource] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filteredData, setFilteredData] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isNotesModalVisible, setIsNotesModalVisible] = useState(false);
+    const [isAddMemberModalVisible, setIsAddMemberModalVisible] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [date, setDate] = useState(null);
     const [notes, setNotes] = useState([]);
-    const [userNotes, setUserNotes] = useState([]); // Store notes of the selected user
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // For selected notes
+    const [userNotes, setUserNotes] = useState([]); 
+    const [newMemberID, setNewMemberID] = useState("");
+    const [newMemberData, setNewMemberData] = useState(null);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]); 
+
 
     useEffect(() => {
         const fetchUser = async () => {
             setLoading(true);
             try {
-                const res = await getUserApi();
+                const res = await getUserApi(groupId);
                 if (!res?.message) {
                     setDataSource(res);
                     setFilteredData(res);
@@ -46,7 +52,50 @@ const UsersPage = () => {
             }
         };
         fetchUser();
-    }, []);
+    }, [newMemberData]);
+
+
+    const handleAddMember = async () => {
+        if (!newMemberID) {
+            notification.error({
+                message: 'Error',
+                description: 'Please enter a valid ID to add a member.',
+            });
+            return;
+        }
+        try {
+            const response = await axios.post(`/users/groups/add-user`, { 
+                groupId : groupId,
+                userId : newMemberID
+            });
+            if (response) {
+                const newMemberData = response.group.members[response.group.members.length - 1]
+                setDataSource([newMemberData,...dataSource]);
+                setNewMemberData([newMemberData,...dataSource])
+                setFilteredData([newMemberData,...dataSource]);
+                setIsAddMemberModalVisible(false);
+                setNewMemberID(""); // Clear input
+                notification.success({
+                    message: 'Success',
+                    description: 'New member added successfully.',
+                });
+            } else {
+                notification.error({
+                    message: 'Error',
+                    description: response.data.message,
+                });
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: 'Failed to add member to the group.',
+            });
+        }
+    };
+
+    const showAddMemberModal = () => {
+        setIsAddMemberModalVisible(true);
+    };
 
     const fetchUserNotes = async (userId) => {
         try {
@@ -100,6 +149,38 @@ const UsersPage = () => {
                 message: "Error",
                 description: "Failed to add the note.",
                 duration: 2,
+            });
+        }
+    };
+
+    const handleDeleteMember = async (userId) => {
+        try {
+            const response = await axios.post(`/users/groups/remove-user`, { 
+                    groupId: groupId, 
+                    userId: userId 
+                }
+            );
+            
+            if (response) {
+                const newGroupData = response.group.members;
+                setDataSource(newGroupData);
+                setNewMemberData(newGroupData)
+                setFilteredData(newGroupData);
+    
+                notification.success({
+                    message: 'Success',
+                    description: 'Member removed successfully.',
+                });
+            } else {
+                notification.error({
+                    message: 'Error',
+                    description: 'Failed to remove member.',
+                });
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: 'An error occurred while removing the member.',
             });
         }
     };
@@ -163,9 +244,23 @@ const UsersPage = () => {
             title: 'Note',
             render: (_, record) => (
                 record.role === 'user' ? (
-                    <Button onClick={() => showAddNoteModal(record.userID)}>
+                    <>
+                    <Button onClick={() => showAddNoteModal(record.userID)} style={{ marginRight: 8 }}>
                         Add Note
                     </Button>
+                    <Button onClick={() => handleDeleteMember(record.userID)} style={{backgroundColor: '#ff4d4f',
+                                                                                        color: 'white',
+                                                                                        border: 'none',
+                                                                                        fontWeight: 'bold',
+                                                                                        padding: '12px 25px',
+                                                                                        borderRadius: '50px',
+                                                                                        transition: 'background-color 0.3s, box-shadow 0.3s, transform 0.3s',
+                                                                                        fontSize: '16px',
+                                                                                    }} >
+                                                                                        
+                        Remove Member
+                    </Button>
+                </>
                 ) : null
             ),
         },
@@ -195,6 +290,9 @@ const UsersPage = () => {
                 onSearch={handleSearch}
                 className="users-page-search"
             />
+            <Button type="primary" onClick={showAddMemberModal} className="add-member-button">
+                Add Member
+            </Button>
             {loading ? (
                 <div className="users-page-loading">
                     <Spin size="large" />
@@ -204,10 +302,29 @@ const UsersPage = () => {
                     dataSource={filteredData}
                     columns={columns}
                     bordered
-                    rowKey={'userID'}
+                    rowKey={(record) => `${record.userID}-${record.role}`}
                     pagination={{ pageSize: 10 }}
                 />
             )}
+
+            {/* Modal for adding a new member */}
+            <Modal
+                title="Add New Member to Group"
+                open={isAddMemberModalVisible}
+                onOk={handleAddMember}
+                onCancel={() => setIsAddMemberModalVisible(false)}
+            >
+                <Form layout="vertical">
+                    <Form.Item label="ID">
+                        <Input
+                            value={newMemberID}
+                            onChange={(e) => setNewMemberID(e.target.value)}
+                            placeholder="Enter the new member's ID"
+                            required
+                        />
+                    </Form.Item>
+                </Form>
+            </Modal>
 
             <Modal
                 title="Add Note"
@@ -264,7 +381,7 @@ const UsersPage = () => {
                     columns={userNotesColumns}
                     rowSelection={rowSelection}
                     bordered
-                    rowKey={'_id'}
+                    rowKey={(record) => `${record._id}`}
                     pagination={{ pageSize: 5 }}
                 />
             </Modal>

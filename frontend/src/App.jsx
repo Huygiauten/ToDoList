@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import "./App.css";
 import Sidebar from "./components/layout/sidebar"; // Import Sidebar component
 import { Outlet } from "react-router-dom";
-import axios from '../src/util/axios.customize';
+import axios from './util/axios.customize';
 import { AuthContext } from "./components/context/auth.context";
 import { Layout, Spin } from "antd";
 
@@ -10,7 +10,7 @@ const { Content } = Layout;
 
 const App = () => {
   const { setAuth, appLoading, setAppLoading } = useContext(AuthContext);
-  const [collapsed, setCollapsed] = useState(true); // Bắt đầu ở trạng thái thu gọn
+  const [collapsed, setCollapsed] = useState(true); 
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -36,11 +36,11 @@ const App = () => {
   }, []);
 
   const handleMouseEnter = () => {
-    setCollapsed(false); // Mở rộng Sidebar khi di chuột vào
+    setCollapsed(false); 
   };
 
   const handleMouseLeave = () => {
-    setCollapsed(true); // Thu gọn Sidebar khi di chuột ra ngoài
+    setCollapsed(true); 
   };
 
   return (

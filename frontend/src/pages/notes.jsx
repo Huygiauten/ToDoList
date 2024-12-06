@@ -1,29 +1,33 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext } from "react";
 import "../styles/notes.css";
+import { useState, useEffect } from "react";
 import axios from '../util/axios.customize';
 import { AuthContext } from "../components/context/auth.context";
-import { DatePicker, Space, Input } from 'antd';
+import { DatePicker, Space } from 'antd';
 
-const { Search } = Input;
 
-const NotesPage = () => {
-  const { auth } = useContext(AuthContext); // Lấy thông tin người dùng
+
+
+const notesPage = () => {
+  const { auth } = useContext(AuthContext);//get userInformation
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState([]);
-  const [originalNotes, setOriginalNotes] = useState([]); // Lưu danh sách gốc của ghi chú
   const [selectedNote, setSelectedNote] = useState(null);
 
-  // Lấy danh sách ghi chú khi tải trang
+  // Fetch notes on initial load
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response1 = await axios.get(`/notes/${auth.user._id}`);
-        const response2 = await axios.get(`/notes/groups/${auth.user.usersID}`);
+        const response1 = await axios.get(
+          `/notes/${auth.user._id}`
+        );
+        const response2 = await axios.get(
+          `/notes/groups/${auth.user.usersID}`
+        );
         const combinedNotes = [...response1, ...response2];
         setNotes(combinedNotes);
-        setOriginalNotes(combinedNotes); // Lưu danh sách gốc
       } catch (err) {
         console.log("Err: " + err);
       }
@@ -31,20 +35,9 @@ const NotesPage = () => {
     fetchNotes();
   }, []);
 
-  // Hàm tìm kiếm ghi chú
-  const handleSearchNotes = (value) => {
-    if (value.trim() === "") {
-      setNotes(originalNotes); // Khôi phục danh sách ban đầu nếu từ khóa rỗng
-    } else {
-      const filteredNotes = originalNotes.filter(note =>
-        note.title.toLowerCase().includes(value.toLowerCase()) ||
-        note.content.toLowerCase().includes(value.toLowerCase())
-      );
-      setNotes(filteredNotes);
-    }
-  };
 
-  // Thêm một ghi chú mới
+
+  // Add a new note
   const handleAddNote = async (event) => {
     event.preventDefault();
     try {
@@ -53,11 +46,10 @@ const NotesPage = () => {
         title,
         content,
         id,
-        date // Thêm ngày vào ghi chú
+        date //add date with notes
       });
       const newNote = response;
-      setNotes([newNote, ...notes]); // Thêm ghi chú mới vào đầu danh sách
-      setOriginalNotes([newNote, ...originalNotes]); // Cập nhật danh sách gốc
+      setNotes([newNote, ...notes]);  // Add the new note to the start of the list
       setTitle("");
       setContent("");
     } catch (err) {
@@ -65,7 +57,7 @@ const NotesPage = () => {
     }
   };
 
-  // Xử lý khi nhấn vào ghi chú (để chỉnh sửa)
+  // Handle note click (for editing)
   const handleNoteClick = (note) => {
     if (note.userId === auth.user._id) {
       setSelectedNote(note);
@@ -74,7 +66,7 @@ const NotesPage = () => {
     }
   };
 
-  // Cập nhật ghi chú
+  // Update an existing note
   const handleUpdateNote = async (event) => {
     event.preventDefault();
     if (!selectedNote) return;
@@ -90,9 +82,6 @@ const NotesPage = () => {
       setNotes(prevNotes => prevNotes.map(note =>
         note._id === selectedNote._id ? updatedNote : note
       ));
-      setOriginalNotes(prevNotes => prevNotes.map(note =>
-        note._id === selectedNote._id ? updatedNote : note
-      ));
 
       setTitle("");
       setContent("");
@@ -102,43 +91,34 @@ const NotesPage = () => {
     }
   };
 
-  // Hủy chỉnh sửa ghi chú
+  // Cancel editing a note
   const handleCancel = () => {
     setTitle("");
     setContent("");
     setSelectedNote(null);
   };
 
-  // Xóa ghi chú
+  // Delete a note
   const deleteNote = async (event, noteId, isUserNote) => {
-    event.stopPropagation(); // Ngăn chặn kích hoạt sự kiện nhấn vào ghi chú
-    if (isUserNote) { // Chỉ cho phép xóa ghi chú do người dùng tạo
+    event.stopPropagation(); // Prevent triggering note click
+    if (isUserNote) { // Only allow deletion for user-created notes
       try {
         await axios.delete(`/notes/${noteId}`);
         const updatedNotes = notes.filter(note => note._id !== noteId);
         setNotes(updatedNotes);
-        setOriginalNotes(updatedNotes); // Cập nhật danh sách gốc
       } catch (err) {
         console.log(err);
       }
     }
   };
 
-  // Xử lý DatePicker
+  //handle datepicker
   const onChange = (date, dateString) => {
     setDate(date);
   };
 
   return (
     <div className="app-container" style={{ margin: 50 }}>
-      {/* Thanh tìm kiếm ghi chú */}
-      <Search
-        placeholder="Search notes by title or content"
-        enterButton
-        onSearch={handleSearchNotes}
-        style={{ marginBottom: 20 }}
-      />
-
       <form className="note-form" onSubmit={(event) => (selectedNote ? handleUpdateNote(event) : handleAddNote(event))}>
         <input
           value={title}
@@ -155,7 +135,7 @@ const NotesPage = () => {
         />
         <DatePicker
           value={date}
-          onChange={onChange}
+          onChange={onChange} //(event) => setDate(event.target.value)
         />
         {selectedNote ? (
           <div className="edit-buttons">
@@ -169,7 +149,7 @@ const NotesPage = () => {
 
       <div className="notes-grid">
         {notes.map((note) => {
-          const isUserNote = note.userId === auth.user._id; // Kiểm tra nếu ghi chú được tạo bởi người dùng
+          const isUserNote = note.userId === auth.user._id; // Check if note was created by user
           return (
             <div
               key={note._id}
@@ -200,4 +180,4 @@ const NotesPage = () => {
   );
 };
 
-export default NotesPage;
+export default notesPage;

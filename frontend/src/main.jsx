@@ -1,14 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
-
+import './styles/global.css'
 import {
   createBrowserRouter,
   RouterProvider,
 
 } from "react-router-dom";
 
-
+import RegisterPage from './pages/register.jsx';
+import ErrorPage from './pages/error.jsx';
+import NotesPage from './pages/notes.jsx';
+import UsersPage from './pages/users.jsx';
+import HomePage from './pages/home.jsx';
+import LoginPage from './pages/login.jsx';
+import GroupPage from './pages/group.jsx';
+import { AuthWrapper } from './components/context/auth.context.js';
 
 const router = createBrowserRouter([
   {
@@ -21,8 +28,12 @@ const router = createBrowserRouter([
         element: <HomePage/>
       },
       {
-        path: "user",
+        path: "user/:groupId",
         element: <UsersPage/>
+      },
+      {
+        path: "group",
+        element: <GroupPage/>
       },
       {
         path: "note",

@@ -1,4 +1,4 @@
-import { Form, Input, Button, notification } from "antd";
+import { Form, Input, Button, notification, Radio  } from "antd";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from '../components/context/auth.context';
@@ -9,10 +9,10 @@ const RegisterPage = () => {
     const navigate = useNavigate();
 
     const onFinish = async (values) => {
-        const { username, email, password } = values;
-
+        const { username, email, password, role } = values;
+        console.log(role);
         // Gọi API để đăng ký người dùng
-        const response = await createUserApi(username, email, password);
+        const response = await createUserApi(username, email, password, role);
 
         if (response) {
             notification.success({
@@ -59,6 +59,16 @@ const RegisterPage = () => {
                         rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
                     >
                         <Input.Password placeholder="Mật khẩu" />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="role"
+                        rules={[{ required: true, message: 'Vui lòng chọn ít nhất một vai trò!' }]}
+                    >
+                        <Radio.Group>
+                            <Radio value="admin">Admin</Radio>
+                            <Radio value="user">User</Radio>
+                        </Radio.Group>
                     </Form.Item>
 
                     <Form.Item>
