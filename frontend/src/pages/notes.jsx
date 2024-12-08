@@ -41,12 +41,12 @@ const notesPage = () => {
   const handleAddNote = async (event) => {
     event.preventDefault();
     try {
-      const id = auth.user._id;
+      const id = auth.user.usersID;
       const response = await axios.post("/notes", {
         title,
         content,
         id,
-        date //add date with notes
+        date 
       });
       const newNote = response;
       setNotes([newNote, ...notes]);  // Add the new note to the start of the list

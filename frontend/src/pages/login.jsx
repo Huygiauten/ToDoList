@@ -70,7 +70,8 @@ const LoginPage = () => {
 
                     {/* Thay thế Checkbox "Nhớ mật khẩu" bằng liên kết đăng ký */}
                     <Form.Item>
-                        <span>Bạn chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></span>
+                        <div>Bạn chưa có tài khoản?</div>
+                        <div><Link to="/register">Đăng ký ngay</Link></div>
                     </Form.Item>
 
                     <Form.Item>
