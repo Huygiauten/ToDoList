@@ -41,7 +41,7 @@ const notesPage = () => {
   const handleAddNote = async (event) => {
     event.preventDefault();
     try {
-      const id = auth.user.usersID;
+      const id = auth.user._id;
       const response = await axios.post("/notes", {
         title,
         content,
